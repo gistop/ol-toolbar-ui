@@ -1,10 +1,22 @@
 <template>
   <div class="ol-toolbar">
     <el-button-group>
-      <el-button type="primary" size="small" :icon="ZoomIn">
+      <el-button 
+        type="primary" 
+        size="small" 
+        :icon="ZoomIn" 
+        @click="handleZoomIn"
+        :class="{ 'is-active': activeMode === 'zoomIn' }"
+      >
         放大
       </el-button>
-      <el-button type="primary" size="small" :icon="ZoomOut">
+      <el-button 
+        type="primary" 
+        size="small" 
+        :icon="ZoomOut" 
+        @click="handleZoomOut"
+        :class="{ 'is-active': activeMode === 'zoomOut' }"
+      >
         缩小
       </el-button>
       <el-button type="success" size="small" :icon="FullScreen" @click="handleFullScreen">
@@ -19,7 +31,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onUnmounted } from 'vue'
 import Map from 'ol/Map'
+import DragBox from 'ol/interaction/DragBox'
+import DragPan from 'ol/interaction/DragPan'
 import { ZoomIn, ZoomOut, FullScreen, Refresh } from '@element-plus/icons-vue'
 
 // 定义 props
@@ -31,12 +46,182 @@ const props = withDefaults(defineProps<Props>(), {
   map: null
 })
 
+// 当前激活的交互模式：'zoomIn' | 'zoomOut' | null
+const activeMode = ref<'zoomIn' | 'zoomOut' | null>(null)
+
+// 存储当前的 DragBox 交互实例
+let dragBoxInteraction: DragBox | null = null
+
+// 存储 DragBox 的事件处理函数引用（用于正确移除监听器）
+let boxEndHandler: (() => void) | null = null
+
+// 存储地图的拖拽交互实例（用于临时禁用/启用）
+let dragPanInteraction: DragPan | null = null
+
+// 激活拉框交互
+const activateDragBox = (mode: 'zoomIn' | 'zoomOut') => {
+  if (!props.map) {
+    console.warn('OlToolbar: map 实例未传入')
+    return
+  }
+
+  // 如果点击的是当前已激活的按钮，则取消激活
+  if (activeMode.value === mode) {
+    // 移除拉框交互
+    if (dragBoxInteraction) {
+      // 先取消激活交互
+      dragBoxInteraction.setActive(false)
+      // 移除事件监听器
+      if (boxEndHandler) {
+        dragBoxInteraction.un('boxend', boxEndHandler)
+        boxEndHandler = null
+      }
+      // 从地图移除交互
+      props.map.removeInteraction(dragBoxInteraction)
+      dragBoxInteraction = null
+    }
+    // 恢复地图拖拽交互
+    if (dragPanInteraction) {
+      props.map.addInteraction(dragPanInteraction)
+      dragPanInteraction = null
+    }
+    activeMode.value = null
+    return
+  }
+
+  // 如果已经有激活的交互，先移除并恢复拖拽
+  if (dragBoxInteraction) {
+    // 先取消激活交互
+    dragBoxInteraction.setActive(false)
+    // 移除事件监听器
+    if (boxEndHandler) {
+      dragBoxInteraction.un('boxend', boxEndHandler)
+      boxEndHandler = null
+    }
+    // 从地图移除交互
+    props.map.removeInteraction(dragBoxInteraction)
+    dragBoxInteraction = null
+    // 恢复地图拖拽交互
+    if (dragPanInteraction) {
+      props.map.addInteraction(dragPanInteraction)
+      dragPanInteraction = null
+    }
+  }
+
+  // 临时禁用地图的拖拽交互
+  const map = props.map!
+  const interactions = map.getInteractions()
+  interactions.forEach((interaction) => {
+    if (interaction instanceof DragPan) {
+      dragPanInteraction = interaction
+      map.removeInteraction(interaction)
+    }
+  })
+
+  // 创建新的 DragBox 交互
+  dragBoxInteraction = new DragBox({
+    condition: (event) => {
+      // 只允许鼠标左键拖拽，并且当前模式必须匹配
+      return event.originalEvent.button === 0 && activeMode.value === mode
+    }
+  })
+
+  // 监听框选完成事件
+  boxEndHandler = () => {
+    const map = props.map!
+    const view = map.getView()
+    const extent = dragBoxInteraction!.getGeometry().getExtent()
+    
+    if (mode === 'zoomIn') {
+      // 拉框放大：将框选区域适配到视图
+      view.fit(extent, {
+        padding: [50, 50, 50, 50],
+        duration: 300
+      })
+    } else if (mode === 'zoomOut') {
+      // 拉框缩小：计算当前视图范围，然后缩小使框选区域占满视图
+      const mapSize = map.getSize()
+      if (mapSize) {
+        // 获取当前视图的地图坐标范围
+        const currentExtent = view.calculateExtent(mapSize)
+        const currentWidth = currentExtent[2] - currentExtent[0]
+        const currentHeight = currentExtent[3] - currentExtent[1]
+        const boxWidth = extent[2] - extent[0]
+        const boxHeight = extent[3] - extent[1]
+        
+        // 计算框选区域相对于当前视图的比例
+        const ratioX = boxWidth / currentWidth
+        const ratioY = boxHeight / currentHeight
+        const ratio = Math.max(ratioX, ratioY)
+        
+        // 如果框选区域小于当前视图，则缩小地图
+        if (ratio < 1) {
+          const currentZoom = view.getZoom() || 0
+          // 计算需要缩小的缩放级别（使框选区域占满视图）
+          const newZoom = currentZoom + Math.log2(ratio)
+          view.animate({
+            zoom: newZoom,
+            center: view.getCenter(),
+            duration: 300
+          })
+        } else {
+          // 如果框选区域大于或等于当前视图，直接 fit（会放大）
+          view.fit(extent, {
+            padding: [50, 50, 50, 50],
+            duration: 300
+          })
+        }
+      }
+    }
+    
+    // 框选完成后不移除交互，保持激活状态，可以继续框选
+    // 只有点击其他按钮或再次点击同一按钮时才会取消激活
+  }
+  
+  dragBoxInteraction.on('boxend', boxEndHandler)
+
+  // 将交互添加到地图
+  props.map.addInteraction(dragBoxInteraction)
+  activeMode.value = mode
+}
+
+// 处理放大按钮点击
+const handleZoomIn = () => {
+  activateDragBox('zoomIn')
+}
+
+// 处理缩小按钮点击
+const handleZoomOut = () => {
+  activateDragBox('zoomOut')
+}
+
 // 全图功能
 const handleFullScreen = () => {
   if (!props.map) {
     console.warn('OlToolbar: map 实例未传入')
     return
   }
+
+  // 取消放大缩小的激活状态
+  if (dragBoxInteraction) {
+    // 先取消激活交互
+    dragBoxInteraction.setActive(false)
+    // 移除事件监听器
+    if (boxEndHandler) {
+      dragBoxInteraction.un('boxend', boxEndHandler)
+      boxEndHandler = null
+    }
+    // 从地图移除交互
+    props.map.removeInteraction(dragBoxInteraction)
+    dragBoxInteraction = null
+  }
+  // 恢复地图拖拽交互
+  if (dragPanInteraction) {
+    props.map.addInteraction(dragPanInteraction)
+    dragPanInteraction = null
+  }
+  // 重置激活状态
+  activeMode.value = null
 
   const map = props.map
   const view = map.getView()
@@ -99,6 +284,13 @@ const handleFullScreen = () => {
     maxZoom: 18 // 最大缩放级别
   })
 }
+
+// 组件卸载时清理交互
+onUnmounted(() => {
+  if (dragBoxInteraction && props.map) {
+    props.map.removeInteraction(dragBoxInteraction)
+  }
+})
 </script>
 
 <style scoped>
@@ -114,5 +306,10 @@ const handleFullScreen = () => {
   margin-top: 6px;
   font-size: 12px;
   color: #909399;
+}
+
+.el-button.is-active {
+  background-color: #66b1ff;
+  border-color: #66b1ff;
 }
 </style>
