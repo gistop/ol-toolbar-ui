@@ -29,12 +29,13 @@ export default defineConfig(({ command }) => {
         },
         rollupOptions: {
           // 不打包 peerDependencies
-          external: ['vue', 'element-plus', 'ol'],
+          external: ['vue', 'element-plus', 'ol', '@element-plus/icons-vue'],
           output: {
             globals: {
               vue: 'Vue',
               'element-plus': 'ElementPlus',
-              ol: 'ol'
+              ol: 'ol',
+              '@element-plus/icons-vue': 'ElementPlusIconsVue'
             }
           }
         }
