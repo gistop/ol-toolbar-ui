@@ -1,6 +1,6 @@
 {
   "name": "ol-toolbar-ui",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "一个基于 OpenLayers 和 Element Plus 的地图工具栏组件",
   "main": "./dist/ol-toolbar.umd.js",
   "module": "./dist/ol-toolbar.es.js",
@@ -16,7 +16,8 @@
         "default": "./dist/ol-toolbar.umd.js"
       },
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./style.css": "./dist/style.css"
   },
   "files": [
     "dist",
