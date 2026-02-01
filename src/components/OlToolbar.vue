@@ -4,7 +4,7 @@
       <el-button 
         type="primary" 
         size="small" 
-        :icon="ZoomIn" 
+        :icon="icons.zoomIn" 
         @click="handleZoomIn"
         :class="{ 'is-active': activeMode === 'zoomIn' }"
       >
@@ -13,16 +13,16 @@
       <el-button 
         type="primary" 
         size="small" 
-        :icon="ZoomOut" 
+        :icon="icons.zoomOut" 
         @click="handleZoomOut"
         :class="{ 'is-active': activeMode === 'zoomOut' }"
       >
         缩小
       </el-button>
-      <el-button type="success" size="small" :icon="FullScreen" @click="handleFullScreen">
+      <el-button type="success" size="small" :icon="icons.fullScreen" @click="handleFullScreen">
         全图
       </el-button>
-      <el-button type="info" size="small" :icon="Refresh">
+      <el-button type="info" size="small" :icon="icons.refresh">
         刷新
       </el-button>
     </el-button-group>
@@ -31,20 +31,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, computed } from 'vue'
 import Map from 'ol/Map'
 import DragBox from 'ol/interaction/DragBox'
 import DragPan from 'ol/interaction/DragPan'
+import type { Component } from 'vue'
+
+// 尝试导入默认图标（由于在 vite.config 中已经 external，运行时应该能从用户的 node_modules 中导入）
+// 使用同步导入，构建时已经 external，运行时应该能正常导入
+// 如果导入失败，将使用 props 传入的图标
 import { ZoomIn, ZoomOut, FullScreen, Refresh } from '@element-plus/icons-vue'
+
+const defaultZoomIn: Component | null = ZoomIn
+const defaultZoomOut: Component | null = ZoomOut
+const defaultFullScreen: Component | null = FullScreen
+const defaultRefresh: Component | null = Refresh
 
 // 定义 props
 interface Props {
   map?: Map | null
+  icons?: {
+    zoomIn?: Component
+    zoomOut?: Component
+    fullScreen?: Component
+    refresh?: Component
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  map: null
+  map: null,
+  icons: () => ({})
 })
+
+// 合并图标：优先使用 props 传入的，否则使用默认的
+const icons = computed(() => ({
+  zoomIn: props.icons?.zoomIn || defaultZoomIn,
+  zoomOut: props.icons?.zoomOut || defaultZoomOut,
+  fullScreen: props.icons?.fullScreen || defaultFullScreen,
+  refresh: props.icons?.refresh || defaultRefresh
+}))
 
 // 当前激活的交互模式：'zoomIn' | 'zoomOut' | null
 const activeMode = ref<'zoomIn' | 'zoomOut' | null>(null)
