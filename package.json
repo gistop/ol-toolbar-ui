@@ -1,17 +1,49 @@
 {
   "name": "ol-toolbar-ui",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "一个基于 OpenLayers 和 Element Plus 的地图工具栏组件",
+  "main": "./dist/ol-toolbar.es.js",
+  "module": "./dist/ol-toolbar.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/ol-toolbar.es.js",
+      "require": "./dist/ol-toolbar.umd.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "set NODE_ENV=production && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "pnpm build"
   },
-  "keywords": [],
+  "keywords": [
+    "openlayers",
+    "ol",
+    "toolbar",
+    "vue3",
+    "element-plus",
+    "map",
+    "gis"
+  ],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
   "packageManager": "pnpm@10.26.2",
+  "peerDependencies": {
+    "vue": "^3.5.0",
+    "element-plus": "^2.8.0",
+    "ol": "^8.2.0"
+  },
   "devDependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "@types/node": "20.12.0",

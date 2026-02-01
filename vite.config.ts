@@ -18,12 +18,12 @@ export default defineConfig({
   },
 
   // 构建模式：打包 src/index.ts 为库
-  build: isBuild
+      build: isBuild
     ? {
         lib: {
           entry: resolve(__dirname, 'src/index.ts'),
-          name: 'OlLayerTreeUI',
-          fileName: (format) => `ol-layer-tree.${format}.js`
+          name: 'OlToolbarUI',
+          fileName: (format) => `ol-toolbar.${format}.js`
         },
         rollupOptions: {
           // 不打包 peerDependencies
