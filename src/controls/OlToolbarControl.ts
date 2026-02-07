@@ -82,28 +82,28 @@ function injectDefaultStyles() {
 
 /* 图标：使用内联 SVG 作为背景图标 */
 .ol-toolbar-btn-zoom-in {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 5v14M5 12h14' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 5v14M5 12h14' stroke='%23000000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 18px 18px;
 }
 
 .ol-toolbar-btn-zoom-out {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h14' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h14' stroke='%23000000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 18px 18px;
 }
 
 .ol-toolbar-btn-full-extent {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='5' width='14' height='14' rx='2' ry='2' fill='none' stroke='%23ffffff' stroke-width='2'/%3E%3Cpath d='M9 9h6v6H9z' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='5' width='14' height='14' rx='2' ry='2' fill='none' stroke='%23000000' stroke-width='2'/%3E%3Cpath d='M9 9h6v6H9z' fill='%23000000'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 18px 18px;
 }
 
 .ol-toolbar-btn-refresh {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 11a7 7 0 0 1 11.9-4.9L19 9M19 5V9M19 13a7 7 0 0 1-11.9 4.9L5 15M5 19v-4' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 11a7 7 0 0 1 11.9-4.9L19 9M19 5V9M19 13a7 7 0 0 1-11.9 4.9L5 15M5 19v-4' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 18px 18px;
